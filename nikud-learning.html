@@ -463,6 +463,13 @@
   .whatsapp-btn:hover { background: rgba(37, 211, 102, 0.2); }
   .whatsapp-btn svg, .secondary-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
 
+  .share-hint {
+    min-height: 1.4rem;
+    margin-top: 0.8rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+
   .review-list { text-align: right; margin: 1.4rem 0 1.6rem; display: grid; gap: 0.8rem; }
   .review-item {
     background: var(--surface-2);
@@ -601,6 +608,7 @@
             שיתוף בוואטסאפ
           </button>
         </div>
+        <div class="share-hint" id="shareHint"></div>
       </div>
 
       <!-- review screen -->
@@ -971,14 +979,136 @@ function backToResults() {
 }
 
 /* ============================================================
-   SHARE — WhatsApp
+   SHARE — colorful result image (not editable text)
    ============================================================ */
 const SITE_URL = 'https://havivon.github.io/Read-learning-/';
 
-function shareWhatsApp() {
+function roundRectPath(x, px, py, w, h, r) {
+  x.beginPath();
+  x.moveTo(px + r, py);
+  x.arcTo(px + w, py, px + w, py + h, r);
+  x.arcTo(px + w, py + h, px, py + h, r);
+  x.arcTo(px, py + h, px, py, r);
+  x.arcTo(px, py, px + w, py, r);
+  x.closePath();
+}
+
+async function buildResultImage() {
+  await document.fonts.ready;
   const s = quiz.score;
-  const text = `תוצאת המבחן שלי בסימני הניקוד: ${s} מתוך ${QUIZ_LEN} תשובות נכונות.\nרוצים לנסות גם? ${SITE_URL}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const c = document.createElement('canvas');
+  c.width = 1080; c.height = 1080;
+  const x = c.getContext('2d');
+
+  /* colorful gradient background */
+  const g = x.createLinearGradient(0, 0, 1080, 1080);
+  g.addColorStop(0, '#6366f1');
+  g.addColorStop(0.5, '#8b5cf6');
+  g.addColorStop(1, '#ec4899');
+  x.fillStyle = g;
+  x.fillRect(0, 0, 1080, 1080);
+
+  /* faint decorative niqqud letters */
+  x.save();
+  x.globalAlpha = 0.14;
+  x.fillStyle = '#ffffff';
+  x.font = '700 110px Rubik, sans-serif';
+  x.textAlign = 'center';
+  const deco = [['אָ', 120, 160], ['בֵּ', 960, 220], ['גִּ', 100, 950], ['דֹּ', 980, 900], ['הֻ', 540, 80], ['וּ', 545, 1040]];
+  deco.forEach(([ch, dx, dy]) => x.fillText(ch, dx, dy));
+  x.restore();
+
+  /* white card */
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,0.3)';
+  x.shadowBlur = 40;
+  x.shadowOffsetY = 12;
+  roundRectPath(x, 110, 150, 860, 780, 48);
+  x.fillStyle = '#ffffff';
+  x.fill();
+  x.restore();
+
+  x.textAlign = 'center';
+  x.direction = 'rtl';
+
+  /* title */
+  x.fillStyle = '#3b2f4a';
+  x.font = '700 62px Rubik, sans-serif';
+  x.fillText('מבחן סימני הניקוד', 540, 275);
+  x.fillStyle = '#8b5cf6';
+  x.font = '500 34px Heebo, sans-serif';
+  x.fillText('תוצאת המבחן שלי', 540, 330);
+
+  /* score ring */
+  const cx = 540, cy = 555, R = 150;
+  x.lineCap = 'round';
+  x.lineWidth = 30;
+  x.strokeStyle = '#efe9fb';
+  x.beginPath();
+  x.arc(cx, cy, R, 0, Math.PI * 2);
+  x.stroke();
+  const ringGrad = x.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+  ringGrad.addColorStop(0, '#6366f1');
+  ringGrad.addColorStop(1, '#ec4899');
+  x.strokeStyle = ringGrad;
+  x.beginPath();
+  x.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * s / QUIZ_LEN));
+  x.stroke();
+
+  /* score number */
+  x.fillStyle = '#3b2f4a';
+  x.font = '700 150px Rubik, sans-serif';
+  x.fillText(String(s), cx, cy + 30);
+  x.fillStyle = '#9aa3b5';
+  x.font = '500 36px Heebo, sans-serif';
+  x.fillText(`מתוך ${QUIZ_LEN}`, cx, cy + 90);
+
+  /* verdict line */
+  const verdict = s === 10 ? 'תוצאה מושלמת!' : s >= 8 ? 'תוצאה מצוינת!' : s >= 5 ? 'תוצאה טובה!' : 'ממשיכים להתאמן!';
+  x.fillStyle = '#6366f1';
+  x.font = '700 46px Rubik, sans-serif';
+  x.fillText(verdict, 540, 815);
+
+  /* URL pill */
+  roundRectPath(x, 210, 860, 660, 76, 38);
+  x.fillStyle = '#f2effc';
+  x.fill();
+  x.fillStyle = '#6d5aa8';
+  x.direction = 'ltr';
+  x.font = '500 30px Heebo, sans-serif';
+  x.fillText(SITE_URL.replace('https://', ''), 540, 908);
+
+  return new Promise(resolve => c.toBlob(resolve, 'image/png'));
+}
+
+async function shareWhatsApp() {
+  const hint = document.getElementById('shareHint');
+  hint.textContent = 'מכין תמונה…';
+  try {
+    const blob = await buildResultImage();
+    const file = new File([blob], 'nikud-result.png', { type: 'image/png' });
+
+    /* mobile: native share sheet with the image (choose WhatsApp there) */
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        hint.textContent = '';
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') { hint.textContent = ''; return; }
+      }
+    }
+
+    /* desktop fallback: download the image to attach manually */
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'nikud-result.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    hint.textContent = 'התמונה נשמרה למכשיר — צרפו אותה לשיחה בוואטסאפ.';
+  } catch (e) {
+    hint.textContent = 'יצירת התמונה נכשלה בדפדפן זה.';
+  }
 }
 </script>
 </body>
