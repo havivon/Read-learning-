@@ -973,9 +973,11 @@ function backToResults() {
 /* ============================================================
    SHARE — WhatsApp
    ============================================================ */
+const SITE_URL = 'https://havivon.github.io/Read-learning-/';
+
 function shareWhatsApp() {
   const s = quiz.score;
-  const text = `תוצאת המבחן שלי בסימני הניקוד: ${s} מתוך ${QUIZ_LEN} תשובות נכונות.\nרוצים לנסות גם? מדריך ומבחן על סימני הניקוד בעברית.`;
+  const text = `תוצאת המבחן שלי בסימני הניקוד: ${s} מתוך ${QUIZ_LEN} תשובות נכונות.\nרוצים לנסות גם? ${SITE_URL}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 </script>
