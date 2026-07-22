@@ -497,6 +497,40 @@
   .review-item .ans-sign { font-size: 1.35rem; display: inline; line-height: 1; }
   .review-item .rev-sign { font-family: 'Rubik', serif; font-size: 1.5rem; margin-inline-start: 0.4rem; }
 
+  /* ---------- leave-quiz modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 14, 0.7);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem 1.6rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    animation: fadeUp 0.25s ease;
+  }
+  .modal-box h3 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .modal-box p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1.4rem;
+  }
+
   .hidden { display: none !important; }
 
   footer {
@@ -624,6 +658,18 @@
     </div>
   </section>
 </main>
+
+<!-- leave-quiz confirmation -->
+<div class="modal-overlay hidden" id="leaveModal">
+  <div class="modal-box">
+    <h3>לצאת באמצע המבחן?</h3>
+    <p>מעבר לדף הלימוד יפסיק את המבחן הנוכחי, והתשובות שענית עד כה לא יישמרו.</p>
+    <div class="btn-row">
+      <button class="primary-btn" onclick="closeLeaveModal()">להמשיך במבחן</button>
+      <button class="secondary-btn" onclick="confirmLeaveQuiz()">להפסיק ולצאת</button>
+    </div>
+  </div>
+</div>
 
 <footer>מדריך סימני הניקוד · ההקראה מבוססת על הקול העברי המובנה בדפדפן</footer>
 
@@ -754,6 +800,15 @@ renderCards();
    TABS
    ============================================================ */
 function showTab(tab) {
+  /* block leaving mid-quiz — confirm first */
+  if (tab === 'learn' && isQuizInProgress()) {
+    document.getElementById('leaveModal').classList.remove('hidden');
+    return;
+  }
+  applyTab(tab);
+}
+
+function applyTab(tab) {
   document.getElementById('learnSection').classList.toggle('hidden', tab !== 'learn');
   document.getElementById('quizSection').classList.toggle('hidden', tab !== 'quiz');
   document.getElementById('tabLearn').classList.toggle('active', tab === 'learn');
@@ -761,11 +816,29 @@ function showTab(tab) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function isQuizInProgress() {
+  return !document.getElementById('quizQuestion').classList.contains('hidden');
+}
+
+function closeLeaveModal() {
+  document.getElementById('leaveModal').classList.add('hidden');
+}
+
+function confirmLeaveQuiz() {
+  closeLeaveModal();
+  clearTimeout(advanceTimer);
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  document.getElementById('quizQuestion').classList.add('hidden');
+  document.getElementById('quizStart').classList.remove('hidden');
+  applyTab('learn');
+}
+
 /* ============================================================
    QUIZ — random 10-question multiple choice
    ============================================================ */
 const QUIZ_LEN = 10;
 let quiz = { questions: [], index: 0, score: 0 };
+let advanceTimer = null;
 
 function shuffle(arr) {
   const a = [...arr];
@@ -920,7 +993,7 @@ function answer(i, clickedBtn) {
 
   /* after a mistake wait longer, so there is time to see the right answer */
   const delay = q.answers[i].correct ? 1400 : 4200;
-  setTimeout(() => {
+  advanceTimer = setTimeout(() => {
     quiz.index++;
     if (quiz.index < QUIZ_LEN) renderQuestion();
     else showResults();
