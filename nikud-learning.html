@@ -400,6 +400,96 @@
     margin-bottom: 1.6rem;
   }
 
+  /* ---------- learn bottom CTA ---------- */
+  .learn-cta {
+    margin-top: 3.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.2rem 1.5rem;
+    text-align: center;
+  }
+  .learn-cta h3 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+  }
+  .learn-cta p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1.3rem;
+    font-weight: 300;
+  }
+
+  /* ---------- result buttons + review ---------- */
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+  }
+  .secondary-btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.75rem 1.8rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--surface-2);
+    color: var(--text);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .whatsapp-btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.75rem 1.8rem;
+    border: 1px solid rgba(37, 211, 102, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(37, 211, 102, 0.1);
+    color: #4ade80;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .whatsapp-btn:hover { background: rgba(37, 211, 102, 0.2); }
+  .whatsapp-btn svg, .secondary-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+  .review-list { text-align: right; margin: 1.4rem 0 1.6rem; display: grid; gap: 0.8rem; }
+  .review-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    border-inline-start: 4px solid var(--green);
+  }
+  .review-item.wrong { border-inline-start-color: var(--red); }
+  .review-item .rev-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+  .review-item .rev-q { font-weight: 500; }
+  .review-item .rev-status { font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+  .review-item .rev-status.good { color: var(--green); }
+  .review-item .rev-status.bad { color: var(--red); }
+  .review-item .rev-line { font-size: 0.9rem; color: var(--text-dim); }
+  .review-item .rev-line b { font-weight: 500; }
+  .review-item .rev-line.good b { color: var(--green); }
+  .review-item .rev-line.bad b { color: var(--red); }
+  .review-item .ans-sign { font-size: 1.35rem; display: inline; line-height: 1; }
+  .review-item .rev-sign { font-family: 'Rubik', serif; font-size: 1.5rem; margin-inline-start: 0.4rem; }
+
   .hidden { display: none !important; }
 
   footer {
@@ -462,6 +552,12 @@
     <h2 class="section-title" style="--c: var(--violet)">סימנים מיוחדים</h2>
     <p class="section-sub">שווא וחטפים — סימנים שאינם תנועה מלאה.</p>
     <div class="cards-grid" id="gridSpecial"></div>
+
+    <div class="learn-cta">
+      <h3>מוכנים לבדוק את עצמכם?</h3>
+      <p>10 שאלות אמריקאיות הנבחרות אקראית בכל פעם.</p>
+      <button class="primary-btn" onclick="showTab('quiz')">מעבר למבחן</button>
+    </div>
   </section>
 
   <!-- ==================== QUIZ ==================== -->
@@ -494,7 +590,27 @@
           <span class="score-label">מתוך 10</span>
         </div>
         <p class="result-breakdown" id="resultMsg"></p>
-        <button class="primary-btn" onclick="startQuiz()">מבחן חדש</button>
+        <div class="btn-row">
+          <button class="primary-btn" onclick="startQuiz()">מבחן חדש</button>
+          <button class="secondary-btn" onclick="showReview()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            מעבר על התשובות
+          </button>
+          <button class="whatsapp-btn" onclick="shareWhatsApp()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            שיתוף בוואטסאפ
+          </button>
+        </div>
+      </div>
+
+      <!-- review screen -->
+      <div class="quiz-card hidden" id="quizReview">
+        <h2 class="quiz-title">מעבר על התשובות</h2>
+        <div class="review-list" id="reviewList"></div>
+        <div class="btn-row">
+          <button class="secondary-btn" onclick="backToResults()">חזרה לתוצאה</button>
+          <button class="primary-btn" onclick="startQuiz()">מבחן חדש</button>
+        </div>
       </div>
 
     </div>
@@ -735,6 +851,7 @@ function startQuiz() {
   }
   document.getElementById('quizStart').classList.add('hidden');
   document.getElementById('quizResult').classList.add('hidden');
+  document.getElementById('quizReview').classList.add('hidden');
   document.getElementById('quizQuestion').classList.remove('hidden');
   renderQuestion();
 }
@@ -773,6 +890,7 @@ function renderQuestion() {
 
 function answer(i, clickedBtn) {
   const q = quiz.questions[quiz.index];
+  q.picked = i;
   const buttons = document.querySelectorAll('#qAnswers .answer-btn');
   buttons.forEach(b => b.disabled = true);
 
@@ -817,6 +935,48 @@ function showResults() {
   else              { title = 'יש עוד מה לחזק'; msg = `${s} תשובות נכונות מתוך ${QUIZ_LEN}. כדאי לעבור שוב על דף הלימוד ולנסות שנית.`; }
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultMsg').textContent = msg;
+}
+
+/* ============================================================
+   REVIEW — go over the answers after the quiz
+   ============================================================ */
+function showReview() {
+  document.getElementById('quizResult').classList.add('hidden');
+  document.getElementById('quizReview').classList.remove('hidden');
+
+  const list = document.getElementById('reviewList');
+  list.innerHTML = quiz.questions.map((q, i) => {
+    const pickedAns = q.answers[q.picked];
+    const correctAns = q.answers.find(a => a.correct);
+    const ok = pickedAns && pickedAns.correct;
+    return `
+      <div class="review-item ${ok ? '' : 'wrong'}">
+        <div class="rev-head">
+          <span class="rev-q">${i + 1}. ${q.text}${q.sign ? `<span class="rev-sign">${q.sign}</span>` : ''}</span>
+          <span class="rev-status ${ok ? 'good' : 'bad'}">${ok ? 'נכון' : 'שגוי'}</span>
+        </div>
+        ${ok
+          ? `<div class="rev-line good">התשובה שלך: <b>${pickedAns.label}</b></div>`
+          : `<div class="rev-line bad">התשובה שלך: <b>${pickedAns ? pickedAns.label : '—'}</b></div>
+             <div class="rev-line good">התשובה הנכונה: <b>${correctAns.label}</b></div>
+             <div class="rev-line">${q.explain}</div>`}
+      </div>`;
+  }).join('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToResults() {
+  document.getElementById('quizReview').classList.add('hidden');
+  document.getElementById('quizResult').classList.remove('hidden');
+}
+
+/* ============================================================
+   SHARE — WhatsApp
+   ============================================================ */
+function shareWhatsApp() {
+  const s = quiz.score;
+  const text = `תוצאת המבחן שלי בסימני הניקוד: ${s} מתוך ${QUIZ_LEN} תשובות נכונות.\nרוצים לנסות גם? מדריך ומבחן על סימני הניקוד בעברית.`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 </script>
 </body>
