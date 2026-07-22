@@ -840,6 +840,37 @@ const QUIZ_LEN = 10;
 let quiz = { questions: [], index: 0, score: 0 };
 let advanceTimer = null;
 
+/* humorous feedback — drawn from a shuffled deck so lines never
+   repeat until the whole pool has been used */
+const PRAISE = [
+  'נכון! תומר, גאון של אמא.',
+  'בול! תומר, אפילו לא הצצת — מרשים.',
+  'יפה מאוד, תומר! האקדמיה ללשון כבר שלחה לך זר פרחים.',
+  'מדויק! תומר, עוד רגע פותחים לך אולפן ניקוד.',
+  'כל הכבוד, תומר! החירִיק גאה בך.',
+  'נכון! תומר, הצֵירֵה מצדיע לך.',
+  'בדיוק! תומר, ספר דקדוק מהלך.',
+  'נכון מאוד! תומר, קליעה בול לפתח.',
+  'יפה, תומר! שקט בבקשה, גאון עברי בבניין.',
+  'נכון! תומר, אפילו בן־יהודה היה מרים גבה בהערכה.',
+];
+const OOPS = [
+  'אופס, תומר... קורה לטובים ביותר.',
+  'לא בדיוק, תומר. הניקוד סלח לך — הפעם.',
+  'תומר, זה היה ניחוש, נכון? ראינו.',
+  'טעות קטנה, תומר. גם השווא נח לפעמים.',
+  'לא נורא, תומר — נקמץ את השיניים וממשיכים.',
+  'כמעט, תומר! הקֻבּוּץ התחמק לך בין האצבעות.',
+  'לא זה, תומר. אבל הביטחון העצמי — עשר.',
+  'אוי, תומר. הסימן הזה עוד יבקש ממך סליחה.',
+];
+const feedbackDecks = { praise: [], oops: [] };
+
+function drawFeedback(pool, deck) {
+  if (deck.length === 0) deck.push(...shuffle(pool));
+  return deck.pop();
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -976,32 +1007,17 @@ function answer(i, clickedBtn) {
   const buttons = document.querySelectorAll('#qAnswers .answer-btn');
   buttons.forEach(b => b.disabled = true);
 
-  const PRAISE = [
-    'נכון! תומר, גאון של אמא.',
-    'בול! תומר, אפילו לא הצצת — מרשים.',
-    'יפה מאוד, תומר! האקדמיה ללשון כבר שלחה לך זר פרחים.',
-    'נכון! תומר, אתה מנקד את זה.',
-    'מדויק! תומר, עוד רגע פותחים לך אולפן ניקוד.',
-    'כל הכבוד, תומר! החירִיק גאה בך.',
-  ];
-  const OOPS = [
-    'אופס, תומר... קורה לטובים ביותר.',
-    'לא בדיוק, תומר. הניקוד סלח לך — הפעם.',
-    'תומר, זה היה ניחוש, נכון? ראינו.',
-    'טעות קטנה, תומר. גם השווא נח לפעמים.',
-    'לא נורא, תומר — נקמץ את השיניים וממשיכים.',
-  ];
   const fb = document.getElementById('qFeedback');
   if (q.answers[i].correct) {
     quiz.score++;
     clickedBtn.classList.add('correct');
-    fb.textContent = rand(PRAISE);
+    fb.textContent = drawFeedback(PRAISE, feedbackDecks.praise);
     fb.classList.add('good');
     correctTone();
   } else {
     clickedBtn.classList.add('wrong');
     buttons.forEach((b, j) => { if (q.answers[j].correct) b.classList.add('correct', 'reveal'); });
-    fb.textContent = `${rand(OOPS)} ${q.explain}`;
+    fb.textContent = `${drawFeedback(OOPS, feedbackDecks.oops)} ${q.explain}`;
     fb.classList.add('bad');
     wrongTone();
   }
