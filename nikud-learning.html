@@ -1006,8 +1006,8 @@ function answer(i, clickedBtn) {
     wrongTone();
   }
 
-  /* after a mistake wait longer, so there is time to see the right answer */
-  const delay = q.answers[i].correct ? 1400 : 4200;
+  /* leave time to read the feedback; after a mistake wait even longer */
+  const delay = q.answers[i].correct ? 2800 : 4200;
   advanceTimer = setTimeout(() => {
     quiz.index++;
     if (quiz.index < QUIZ_LEN) renderQuestion();
