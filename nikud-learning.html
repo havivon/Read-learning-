@@ -221,6 +221,16 @@
     font-size: 1rem;
     margin-bottom: 0.9rem;
   }
+  .nikud-note {
+    background: #fff8e6;
+    border: 2px dashed var(--yellow);
+    border-radius: 14px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.88rem;
+    color: #8a6d1f;
+    margin: -0.3rem 0 0.9rem;
+    line-height: 1.5;
+  }
   .play-btn {
     font-family: inherit;
     font-size: 1.05rem;
@@ -345,6 +355,21 @@
     background: #ffe0e0;
     border-color: #f87171;
     animation: shake 0.4s;
+  }
+  .answer-btn.reveal {
+    animation: revealPulse 1.1s ease 0.3s 3;
+    position: relative;
+  }
+  .answer-btn.reveal::after {
+    content: '✅ התשובה הנכונה';
+    display: block;
+    font-size: 0.85rem;
+    color: #0d9f6e;
+    margin-top: 0.3rem;
+  }
+  @keyframes revealPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6); transform: scale(1); }
+    50% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); transform: scale(1.05); }
   }
   .answer-btn .ans-sign { font-size: 2.6rem; line-height: 1.3; display: block; }
   @keyframes bounceAnswer {
@@ -533,8 +558,14 @@ const NIKUD = [
   { name: 'סֶגּוֹל',       sign: 'בֶּ',  sound: 'אֶה', speak: 'סֶגּוֹל',       speakSound: 'בֶּה', type: 'ktana' },
   { name: 'חִירִיק חָסֵר', sign: 'בִּ',  sound: 'אִי', speak: 'חִירִיק חָסֵר', speakSound: 'בִּי', type: 'ktana' },
   { name: 'קֻבּוּץ',       sign: 'בֻּ',  sound: 'אוּ', speak: 'קוּבּוּץ',      speakSound: 'בּוּ', type: 'ktana' },
+  { name: 'קָמָץ קָטָן',   sign: 'בׇּ',  sound: 'אוֹ', speak: 'קָמָץ קָטָן',   speakSound: 'בּוֹ', type: 'ktana',
+    note: 'נראה בדיוק כמו קָמָץ, אבל נשמע אוֹ! כמו במילה: חָכְמָה (חוֹכְמָה)', hideFromSignQuiz: true },
 
-  { name: 'שְׁוָא',        sign: 'בְּ',  sound: 'אְ (בלי תנועה)', speak: 'שְׁוָוא', speakSound: 'בְּ', type: 'special' },
+  { name: 'שְׁוָא נָע',    sign: 'בְּ',  sound: 'אֶ קצרצר', speak: 'שְׁוָוא נָע', speakSound: 'בֶּ', type: 'special',
+    note: 'זז ומשמיע צליל קטן! בא בתחילת מילה או הברה, כמו: בְּרֵאשִׁית', hideFromSignQuiz: true },
+  { name: 'שְׁוָא נָח',    sign: 'בְ',   sound: 'שֶׁקֶט — בלי צליל', speak: 'שְׁוָוא נָח', speakSound: '', type: 'special',
+    note: 'נח ושקט, בלי צליל! סוגר הברה באמצע מילה, כמו: מַלְ־כָּה',
+    speakFull: 'שְׁוָוא נָח. הוא שקט לגמרי, בלי צליל. כמו במילה מַלְכָּה', hideFromSignQuiz: true },
   { name: 'חֲטַף פַּתָח',  sign: 'חֲ',  sound: 'אַ קצרצר',  speak: 'חֲטַף פַּתָח',  speakSound: 'חַ', type: 'special' },
   { name: 'חֲטַף סֶגוֹל',  sign: 'חֱ',  sound: 'אֶ קצרצר',  speak: 'חֲטַף סֶגוֹל',  speakSound: 'חֶ', type: 'special' },
   { name: 'חֲטַף קָמָץ',   sign: 'חֳ',  sound: 'אָ קצרצר',  speak: 'חֲטַף קָמָץ',   speakSound: 'חׇ', type: 'special' },
@@ -577,7 +608,8 @@ function speak(text, btn) {
 
 function speakNikud(index, btn) {
   const n = NIKUD[index];
-  speak(`${n.speak}. ${n.speakSound}, ${n.speakSound}`, btn);
+  if (n.speakFull) speak(n.speakFull, btn);
+  else speak(`${n.speak}. ${n.speakSound}, ${n.speakSound}`, btn);
 }
 
 /* ============================================================
@@ -621,6 +653,7 @@ function renderCards() {
       <div class="big-sign">${n.sign}</div>
       <div class="nikud-name">${n.name}</div>
       <div class="nikud-sound">נשמע כמו: ${n.sound}</div>
+      ${n.note ? `<div class="nikud-note">💡 ${n.note}</div>` : ''}
       <button class="play-btn" onclick="speakNikud(${i}, this)">🔊 שמעו אותי</button>
     `;
     grids[n.type].appendChild(card);
@@ -671,10 +704,14 @@ function buildQuestion() {
   const types = ['nameFromSign', 'signFromName', 'soundFromSign', 'bigOrSmall'];
   const qType = rand(types);
   const vowelsOnly = NIKUD.filter(n => n.type !== 'special');
+  /* signs that look identical to another sign (kamatz katan, shva variants)
+     can't be identified visually — keep them out of sign-based questions */
+  const signQuizPool = NIKUD.filter(n => !n.hideFromSignQuiz);
+  const vowelSignPool = vowelsOnly.filter(n => !n.hideFromSignQuiz);
 
   if (qType === 'nameFromSign') {
-    const target = rand(NIKUD);
-    const opts = pickOptions(NIKUD, target, 4, n => n.name);
+    const target = rand(signQuizPool);
+    const opts = pickOptions(signQuizPool, target, 4, n => n.name);
     return {
       text: 'איך קוראים לסימן הזה?',
       sign: target.sign,
@@ -685,8 +722,8 @@ function buildQuestion() {
   }
 
   if (qType === 'signFromName') {
-    const target = rand(NIKUD);
-    const opts = pickOptions(NIKUD, target, 4, n => n.sign);
+    const target = rand(signQuizPool);
+    const opts = pickOptions(signQuizPool, target, 4, n => n.sign);
     return {
       text: `איפה מתחבא ${target.name}?`,
       sign: null,
@@ -697,8 +734,8 @@ function buildQuestion() {
   }
 
   if (qType === 'soundFromSign') {
-    const target = rand(vowelsOnly);
-    const opts = pickOptions(vowelsOnly, target, 4, n => n.sound);
+    const target = rand(vowelSignPool);
+    const opts = pickOptions(vowelSignPool, target, 4, n => n.sound);
     return {
       text: 'איזה צליל משמיע הסימן הזה?',
       sign: target.sign,
@@ -789,17 +826,19 @@ function answer(i, clickedBtn) {
     happySound();
   } else {
     clickedBtn.classList.add('wrong');
-    buttons.forEach((b, j) => { if (q.answers[j].correct) b.classList.add('correct'); });
+    buttons.forEach((b, j) => { if (q.answers[j].correct) b.classList.add('correct', 'reveal'); });
     fb.textContent = `${rand(OOPS)} ${q.explain}`;
     fb.classList.add('bad');
     sadSound();
   }
 
+  /* after a mistake wait longer, so there is time to see the right answer */
+  const delay = q.answers[i].correct ? 1600 : 4200;
   setTimeout(() => {
     quiz.index++;
     if (quiz.index < QUIZ_LEN) renderQuestion();
     else showResults();
-  }, 1800);
+  }, delay);
 }
 
 function showResults() {
