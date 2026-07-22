@@ -595,8 +595,8 @@
     <div class="cards-grid" id="gridSpecial"></div>
 
     <div class="learn-cta">
-      <h3>מוכנים לבדוק את עצמכם?</h3>
-      <p>10 שאלות אמריקאיות הנבחרות אקראית בכל פעם.</p>
+      <h3>תומר, מוכן לבדוק את עצמך?</h3>
+      <p>10 שאלות מחכות לך. אפשר להציץ בסימנים עוד סיבוב — עכשיו זה עדיין לא נחשב העתקה. 😏</p>
       <button class="primary-btn" onclick="showTab('quiz')">מעבר למבחן</button>
     </div>
   </section>
@@ -607,9 +607,9 @@
 
       <!-- start screen -->
       <div class="quiz-card" id="quizStart">
-        <h2 class="quiz-title">מבחן תרגול</h2>
-        <p class="quiz-desc">10 שאלות אמריקאיות הנבחרות אקראית בכל פעם: זיהוי סימנים, הגייה וסיווג תנועות. לאחר טעות מוצגת התשובה הנכונה.</p>
-        <button class="primary-btn" onclick="startQuiz()">התחלת מבחן</button>
+        <h2 class="quiz-title">מוכן למבחן, תומר?</h2>
+        <p class="quiz-desc">10 שאלות אמריקאיות שמוגרלות מחדש בכל פעם: זיהוי סימנים, הגייה וסיווג תנועות. בלי לחץ — רק כל הכבוד שלך מונח על הכף. 😉</p>
+        <button class="primary-btn" onclick="startQuiz()">יאללה, מתחילים</button>
       </div>
 
       <!-- question screen -->
@@ -662,11 +662,11 @@
 <!-- leave-quiz confirmation -->
 <div class="modal-overlay hidden" id="leaveModal">
   <div class="modal-box">
-    <h3>לצאת באמצע המבחן?</h3>
-    <p>מעבר לדף הלימוד יפסיק את המבחן הנוכחי, והתשובות שענית עד כה לא יישמרו.</p>
+    <h3>לא להעתיק, תומר! 🕵️</h3>
+    <p>ראינו אותך... מציץ בחומר הלימוד באמצע מבחן? אם תצא עכשיו — המבחן יתאפס וכל התשובות שענית יימחקו. בלי טריקים.</p>
     <div class="btn-row">
-      <button class="primary-btn" onclick="closeLeaveModal()">להמשיך במבחן</button>
-      <button class="secondary-btn" onclick="confirmLeaveQuiz()">להפסיק ולצאת</button>
+      <button class="primary-btn" onclick="closeLeaveModal()">טוב, נשארתי 😅</button>
+      <button class="secondary-btn" onclick="confirmLeaveQuiz()">מוותר, קח אותי ללימוד</button>
     </div>
   </div>
 </div>
@@ -976,17 +976,32 @@ function answer(i, clickedBtn) {
   const buttons = document.querySelectorAll('#qAnswers .answer-btn');
   buttons.forEach(b => b.disabled = true);
 
+  const PRAISE = [
+    'נכון! תומר, גאון של אמא.',
+    'בול! תומר, אפילו לא הצצת — מרשים.',
+    'יפה מאוד, תומר! האקדמיה ללשון כבר שלחה לך זר פרחים.',
+    'נכון! תומר, אתה מנקד את זה.',
+    'מדויק! תומר, עוד רגע פותחים לך אולפן ניקוד.',
+    'כל הכבוד, תומר! החירִיק גאה בך.',
+  ];
+  const OOPS = [
+    'אופס, תומר... קורה לטובים ביותר.',
+    'לא בדיוק, תומר. הניקוד סלח לך — הפעם.',
+    'תומר, זה היה ניחוש, נכון? ראינו.',
+    'טעות קטנה, תומר. גם השווא נח לפעמים.',
+    'לא נורא, תומר — נקמץ את השיניים וממשיכים.',
+  ];
   const fb = document.getElementById('qFeedback');
   if (q.answers[i].correct) {
     quiz.score++;
     clickedBtn.classList.add('correct');
-    fb.textContent = 'תשובה נכונה.';
+    fb.textContent = rand(PRAISE);
     fb.classList.add('good');
     correctTone();
   } else {
     clickedBtn.classList.add('wrong');
     buttons.forEach((b, j) => { if (q.answers[j].correct) b.classList.add('correct', 'reveal'); });
-    fb.textContent = `תשובה שגויה. ${q.explain}`;
+    fb.textContent = `${rand(OOPS)} ${q.explain}`;
     fb.classList.add('bad');
     wrongTone();
   }
@@ -1011,10 +1026,10 @@ function showResults() {
   document.getElementById('scoreNum').textContent = s;
 
   let title, msg;
-  if (s === 10)     { title = 'תוצאה מושלמת'; msg = 'עניתם נכון על כל השאלות.'; }
-  else if (s >= 8) { title = 'תוצאה מצוינת'; msg = `${s} תשובות נכונות מתוך ${QUIZ_LEN}. כמעט שליטה מלאה בחומר.`; }
-  else if (s >= 5) { title = 'תוצאה טובה'; msg = `${s} תשובות נכונות מתוך ${QUIZ_LEN}. מומלץ לחזור על הסימנים שבהם טעיתם.`; }
-  else              { title = 'יש עוד מה לחזק'; msg = `${s} תשובות נכונות מתוך ${QUIZ_LEN}. כדאי לעבור שוב על דף הלימוד ולנסות שנית.`; }
+  if (s === 10)     { title = 'תומר?! עשר מתוך עשר!'; msg = 'מושלם. רק שאלה קטנה — בטוח שלא העתקת? 😏'; }
+  else if (s >= 8) { title = 'כל הכבוד, תומר!'; msg = `${s} מתוך ${QUIZ_LEN}. עוד קצת ואתה מנקד את התנ"ך בעצמך.`; }
+  else if (s >= 5) { title = 'לא רע בכלל, תומר'; msg = `${s} מתוך ${QUIZ_LEN}. הניקוד עוד לא מפחד ממך, אבל הוא כבר קצת עצבני.`; }
+  else              { title = 'אוי, תומר...'; msg = `${s} מתוך ${QUIZ_LEN}. השווא נח, ואתה כנראה גם. סיבוב בדף הלימוד ותחזור לנצח!`; }
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultMsg').textContent = msg;
 }
@@ -1111,7 +1126,7 @@ async function buildResultImage() {
   x.fillText('מבחן סימני הניקוד', 540, 275);
   x.fillStyle = '#8b5cf6';
   x.font = '500 34px Heebo, sans-serif';
-  x.fillText('תוצאת המבחן שלי', 540, 330);
+  x.fillText('התוצאה של תומר', 540, 330);
 
   /* score ring */
   const cx = 540, cy = 555, R = 150;
@@ -1138,7 +1153,7 @@ async function buildResultImage() {
   x.fillText(`מתוך ${QUIZ_LEN}`, cx, cy + 90);
 
   /* verdict line */
-  const verdict = s === 10 ? 'תוצאה מושלמת!' : s >= 8 ? 'תוצאה מצוינת!' : s >= 5 ? 'תוצאה טובה!' : 'ממשיכים להתאמן!';
+  const verdict = s === 10 ? 'תומר, מושלם! בלי להעתיק!' : s >= 8 ? 'כל הכבוד, תומר!' : s >= 5 ? 'לא רע בכלל, תומר' : 'תומר בדרך לגדולה!';
   x.fillStyle = '#6366f1';
   x.font = '700 46px Rubik, sans-serif';
   x.fillText(verdict, 540, 815);
