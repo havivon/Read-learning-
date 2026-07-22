@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עולם הניקוד — לומדים ניקוד בכיף!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ec;
+    --surface: #ffffff;
+    --text: #3b2f4a;
+    --accent: #ff6b9d;
+    --purple: #8b5cf6;
+    --blue: #38bdf8;
+    --green: #34d399;
+    --orange: #fb923c;
+    --yellow: #fbbf24;
+    --shadow: 0 8px 24px rgba(59, 47, 74, 0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Varela Round', 'Rubik', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255, 107, 157, 0.08) 0%, transparent 30%),
+      radial-gradient(circle at 85% 60%, rgba(139, 92, 246, 0.08) 0%, transparent 30%),
+      radial-gradient(circle at 50% 90%, rgba(56, 189, 248, 0.08) 0%, transparent 30%);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---------- floating decorations ---------- */
+  .floaty {
+    position: fixed;
+    font-size: 2rem;
+    opacity: 0.15;
+    pointer-events: none;
+    animation: floatAround 14s ease-in-out infinite;
+    z-index: 0;
+  }
+  @keyframes floatAround {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50% { transform: translateY(-30px) rotate(8deg); }
+  }
+
+  /* ---------- header ---------- */
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .logo {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    background: linear-gradient(135deg, #ff6b9d, #8b5cf6, #38bdf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    animation: popIn 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .subtitle {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: #7c6f8f;
+    margin-top: 0.5rem;
+  }
+
+  /* ---------- tabs ---------- */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 1.5rem auto 2rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    padding: 0 1rem;
+  }
+  .tab-btn {
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transition: all 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-bottom: 4px solid #e8dfd3;
+  }
+  .tab-btn:hover { transform: translateY(-3px) scale(1.04); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    color: white;
+    border-bottom-color: #c44579;
+    transform: scale(1.06);
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- legend ---------- */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .legend-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+    font-size: 0.95rem;
+  }
+  .dot { width: 16px; height: 16px; border-radius: 50%; }
+  .dot.gdola { background: var(--green); }
+  .dot.ktana { background: var(--orange); }
+  .dot.special { background: var(--purple); }
+
+  /* ---------- section titles ---------- */
+  .section-title {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    margin: 2.2rem 0 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-title .bar {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    opacity: 0.25;
+  }
+
+  /* ---------- cards grid ---------- */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.2rem;
+  }
+  .nikud-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 1.4rem 1.2rem 1.2rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    position: relative;
+    transition: transform 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.25s;
+    border-top: 6px solid transparent;
+    animation: cardIn 0.5s ease backwards;
+  }
+  .nikud-card:hover {
+    transform: translateY(-6px) rotate(-1deg);
+    box-shadow: 0 16px 32px rgba(59, 47, 74, 0.18);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .nikud-card.gdola { border-top-color: var(--green); }
+  .nikud-card.ktana { border-top-color: var(--orange); }
+  .nikud-card.special { border-top-color: var(--purple); }
+
+  .badge {
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    color: white;
+  }
+  .badge.gdola { background: var(--green); }
+  .badge.ktana { background: var(--orange); }
+  .badge.special { background: var(--purple); }
+
+  .big-sign {
+    font-family: 'Rubik', 'David Libre', serif;
+    font-size: 4.2rem;
+    line-height: 1.3;
+    font-weight: 500;
+    margin: 0.6rem 0 0.2rem;
+    color: var(--text);
+    user-select: none;
+  }
+  .nikud-name {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 900;
+    font-size: 1.35rem;
+    margin-bottom: 0.15rem;
+  }
+  .nikud-sound {
+    color: #7c6f8f;
+    font-size: 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .play-btn {
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.65rem 1.6rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55), filter 0.2s;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+  }
+  .play-btn:hover { transform: scale(1.08); filter: brightness(1.08); }
+  .play-btn:active { transform: scale(0.95); }
+  .play-btn.playing { animation: pulse 0.8s ease infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .quiz-card {
+    background: var(--surface);
+    border-radius: 28px;
+    padding: 2rem 1.6rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+    animation: cardIn 0.4s ease;
+  }
+  .quiz-start-emoji { font-size: 4.5rem; animation: floatAround 4s ease-in-out infinite; display: inline-block; }
+  .quiz-title { font-family: 'Rubik'; font-weight: 900; font-size: 1.8rem; margin: 0.8rem 0 0.4rem; }
+  .quiz-desc { color: #7c6f8f; font-size: 1.1rem; margin-bottom: 1.5rem; }
+
+  .big-action-btn {
+    font-family: inherit;
+    font-size: 1.4rem;
+    font-weight: 900;
+    padding: 1rem 3rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    color: white;
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+  .big-action-btn:hover { transform: scale(1.07) rotate(-1deg); }
+  .big-action-btn:active { transform: scale(0.95); }
+
+  .progress-track {
+    background: #f0e8dc;
+    border-radius: 999px;
+    height: 16px;
+    margin-bottom: 1.4rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    transition: width 0.4s ease;
+  }
+  .q-counter { font-weight: 700; color: #7c6f8f; margin-bottom: 0.6rem; font-size: 1rem; }
+  .q-text {
+    font-family: 'Rubik';
+    font-weight: 900;
+    font-size: 1.45rem;
+    margin-bottom: 1rem;
+  }
+  .q-sign-display {
+    font-family: 'Rubik', serif;
+    font-size: 5rem;
+    line-height: 1.3;
+    margin: 0.4rem 0 1.2rem;
+    display: inline-block;
+    background: linear-gradient(135deg, #fff4d6, #ffe3ef);
+    border-radius: 24px;
+    padding: 0.4rem 2.2rem;
+    border: 3px dashed var(--yellow);
+  }
+  .q-listen {
+    margin-bottom: 1.2rem;
+  }
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+  @media (max-width: 480px) { .answers { grid-template-columns: 1fr; } }
+  .answer-btn {
+    font-family: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 1rem 0.8rem;
+    border-radius: 18px;
+    border: 3px solid #ece2d4;
+    background: #fdfaf5;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--purple);
+    background: #f6f0ff;
+    transform: translateY(-3px);
+  }
+  .answer-btn:disabled { cursor: default; }
+  .answer-btn.correct {
+    background: #d9f8ea;
+    border-color: var(--green);
+    animation: bounceAnswer 0.5s;
+  }
+  .answer-btn.wrong {
+    background: #ffe0e0;
+    border-color: #f87171;
+    animation: shake 0.4s;
+  }
+  .answer-btn .ans-sign { font-size: 2.6rem; line-height: 1.3; display: block; }
+  @keyframes bounceAnswer {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+  .feedback-line {
+    min-height: 2.2rem;
+    font-size: 1.3rem;
+    font-weight: 900;
+    margin-top: 1rem;
+  }
+  .feedback-line.good { color: #0d9f6e; }
+  .feedback-line.bad { color: #e11d48; }
+
+  /* ---------- results ---------- */
+  .score-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin: 1rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(var(--green) calc(var(--pct) * 1%), #f0e8dc 0);
+    position: relative;
+  }
+  .score-circle::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    background: var(--surface);
+    border-radius: 50%;
+  }
+  .score-circle span { position: relative; z-index: 1; }
+  .score-num { font-family: 'Rubik'; font-weight: 900; font-size: 2.6rem; }
+  .score-label { color: #7c6f8f; font-weight: 700; }
+  .stars-row { font-size: 2.6rem; margin: 0.6rem 0; letter-spacing: 0.3rem; }
+  .stars-row .star { display: inline-block; animation: starPop 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) backwards; }
+  @keyframes starPop {
+    from { transform: scale(0) rotate(-180deg); }
+    to { transform: scale(1) rotate(0); }
+  }
+
+  /* ---------- confetti ---------- */
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 12px;
+    height: 12px;
+    z-index: 999;
+    pointer-events: none;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+  }
+
+  .hidden { display: none !important; }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: #b0a4c2;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tts-warning {
+    background: #fff3cd;
+    border: 2px solid var(--yellow);
+    border-radius: 16px;
+    padding: 0.8rem 1.2rem;
+    margin: 0 auto 1.5rem;
+    max-width: 640px;
+    text-align: center;
+    font-weight: 700;
+    color: #92600a;
+  }
+</style>
+</head>
+<body>
+
+<!-- floating letters decoration -->
+<div class="floaty" style="top:12%; right:5%; animation-delay:0s">אָ</div>
+<div class="floaty" style="top:30%; left:4%; animation-delay:2s">בֵּ</div>
+<div class="floaty" style="top:65%; right:8%; animation-delay:4s">גִּ</div>
+<div class="floaty" style="top:80%; left:10%; animation-delay:1s">דֹּ</div>
+<div class="floaty" style="top:45%; right:45%; animation-delay:3s">הֻ</div>
+
+<header>
+  <h1 class="logo">🎈 עולם הניקוד 🎈</h1>
+  <p class="subtitle">לומדים את סימני הניקוד, שומעים איך הם נשמעים — ונבחנים בכיף!</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" id="tabLearn" onclick="showTab('learn')">📖 לומדים</button>
+  <button class="tab-btn" id="tabQuiz" onclick="showTab('quiz')">🏆 מבחן</button>
+</nav>
+
+<main>
+  <!-- ==================== LEARN ==================== -->
+  <section id="learnSection">
+    <div class="tts-warning hidden" id="ttsWarning">
+      🔇 נראה שהדפדפן שלך לא תומך בהשמעת קול בעברית. נסו בדפדפן כרום במחשב או בטלפון.
+    </div>
+
+    <div class="legend">
+      <div class="legend-chip"><span class="dot gdola"></span> תנועה גדולה</div>
+      <div class="legend-chip"><span class="dot ktana"></span> תנועה קטנה</div>
+      <div class="legend-chip"><span class="dot special"></span> סימן מיוחד</div>
+    </div>
+
+    <h2 class="section-title">🟢 תנועות גדולות <span class="bar" style="background:var(--green)"></span></h2>
+    <div class="cards-grid" id="gridGdola"></div>
+
+    <h2 class="section-title">🟠 תנועות קטנות <span class="bar" style="background:var(--orange)"></span></h2>
+    <div class="cards-grid" id="gridKtana"></div>
+
+    <h2 class="section-title">🟣 סימנים מיוחדים <span class="bar" style="background:var(--purple)"></span></h2>
+    <div class="cards-grid" id="gridSpecial"></div>
+  </section>
+
+  <!-- ==================== QUIZ ==================== -->
+  <section id="quizSection" class="hidden">
+    <div class="quiz-wrap">
+
+      <!-- start screen -->
+      <div class="quiz-card" id="quizStart">
+        <span class="quiz-start-emoji">🦉</span>
+        <h2 class="quiz-title">מוכנים למבחן?</h2>
+        <p class="quiz-desc">10 שאלות מפתיעות על סימני הניקוד.<br>בכל פעם המבחן שונה — בהצלחה! 🍀</p>
+        <button class="big-action-btn" onclick="startQuiz()">יאללה, מתחילים! 🚀</button>
+      </div>
+
+      <!-- question screen -->
+      <div class="quiz-card hidden" id="quizQuestion">
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-counter" id="qCounter"></div>
+        <div class="q-text" id="qText"></div>
+        <div id="qSignWrap"></div>
+        <div class="q-listen" id="qListen"></div>
+        <div class="answers" id="qAnswers"></div>
+        <div class="feedback-line" id="qFeedback"></div>
+      </div>
+
+      <!-- results screen -->
+      <div class="quiz-card hidden" id="quizResult">
+        <h2 class="quiz-title" id="resultTitle"></h2>
+        <div class="score-circle" id="scoreCircle">
+          <span class="score-num" id="scoreNum"></span>
+          <span class="score-label">מתוך 10</span>
+        </div>
+        <div class="stars-row" id="starsRow"></div>
+        <p class="quiz-desc" id="resultMsg"></p>
+        <button class="big-action-btn" onclick="startQuiz()">🔄 עוד פעם!</button>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer>נבנה באהבה לילדים שלומדים לקרוא 💜</footer>
+
+<script>
+/* ============================================================
+   DATA — every niqqud sign
+   type: gdola = תנועה גדולה, ktana = תנועה קטנה, special = סימן מיוחד
+   ============================================================ */
+const NIKUD = [
+  { name: 'קָמָץ',        sign: 'בָּ',  sound: 'אָה', speak: 'קָמָץ',        speakSound: 'בָּה', type: 'gdola' },
+  { name: 'צֵירֵה',       sign: 'בֵּ',  sound: 'אֵה', speak: 'צֵירֶה',       speakSound: 'בֵּה', type: 'gdola' },
+  { name: 'חִירִיק מָלֵא', sign: 'בִּי', sound: 'אִי', speak: 'חִירִיק מָלֵא', speakSound: 'בִּי', type: 'gdola' },
+  { name: 'חוֹלָם מָלֵא',  sign: 'בּוֹ', sound: 'אוֹ', speak: 'חוֹלָם מָלֵא',  speakSound: 'בּוֹ', type: 'gdola' },
+  { name: 'חוֹלָם חָסֵר',  sign: 'בֹּ',  sound: 'אוֹ', speak: 'חוֹלָם חָסֵר',  speakSound: 'בּוֹ', type: 'gdola' },
+  { name: 'שׁוּרוּק',      sign: 'בּוּ', sound: 'אוּ', speak: 'שׁוּרוּק',      speakSound: 'בּוּ', type: 'gdola' },
+
+  { name: 'פַּתָּח',       sign: 'בַּ',  sound: 'אַה', speak: 'פַּתָח',       speakSound: 'בַּה', type: 'ktana' },
+  { name: 'סֶגּוֹל',       sign: 'בֶּ',  sound: 'אֶה', speak: 'סֶגּוֹל',       speakSound: 'בֶּה', type: 'ktana' },
+  { name: 'חִירִיק חָסֵר', sign: 'בִּ',  sound: 'אִי', speak: 'חִירִיק חָסֵר', speakSound: 'בִּי', type: 'ktana' },
+  { name: 'קֻבּוּץ',       sign: 'בֻּ',  sound: 'אוּ', speak: 'קוּבּוּץ',      speakSound: 'בּוּ', type: 'ktana' },
+
+  { name: 'שְׁוָא',        sign: 'בְּ',  sound: 'אְ (בלי תנועה)', speak: 'שְׁוָוא', speakSound: 'בְּ', type: 'special' },
+  { name: 'חֲטַף פַּתָח',  sign: 'חֲ',  sound: 'אַ קצרצר',  speak: 'חֲטַף פַּתָח',  speakSound: 'חַ', type: 'special' },
+  { name: 'חֲטַף סֶגוֹל',  sign: 'חֱ',  sound: 'אֶ קצרצר',  speak: 'חֲטַף סֶגוֹל',  speakSound: 'חֶ', type: 'special' },
+  { name: 'חֲטַף קָמָץ',   sign: 'חֳ',  sound: 'אָ קצרצר',  speak: 'חֲטַף קָמָץ',   speakSound: 'חׇ', type: 'special' },
+];
+
+const TYPE_LABEL = { gdola: 'תנועה גדולה', ktana: 'תנועה קטנה', special: 'סימן מיוחד' };
+
+/* ============================================================
+   SPEECH — Web Speech API with Hebrew voice
+   ============================================================ */
+let hebrewVoice = null;
+
+function pickHebrewVoice() {
+  const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  hebrewVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('he')) || null;
+  if (!window.speechSynthesis) {
+    document.getElementById('ttsWarning').classList.remove('hidden');
+  }
+}
+if (window.speechSynthesis) {
+  pickHebrewVoice();
+  speechSynthesis.onvoiceschanged = pickHebrewVoice;
+}
+
+function speak(text, btn) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'he-IL';
+  if (hebrewVoice) u.voice = hebrewVoice;
+  u.rate = 0.8;
+  u.pitch = 1.1;
+  if (btn) {
+    btn.classList.add('playing');
+    u.onend = () => btn.classList.remove('playing');
+    u.onerror = () => btn.classList.remove('playing');
+  }
+  speechSynthesis.speak(u);
+}
+
+function speakNikud(index, btn) {
+  const n = NIKUD[index];
+  speak(`${n.speak}. ${n.speakSound}, ${n.speakSound}`, btn);
+}
+
+/* ============================================================
+   sound effects (Web Audio) — happy / sad jingles
+   ============================================================ */
+let audioCtx = null;
+function playTone(freqs, dur) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, audioCtx.currentTime + i * dur);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i + 1) * dur);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(audioCtx.currentTime + i * dur);
+      o.stop(audioCtx.currentTime + (i + 1) * dur);
+    });
+  } catch (e) { /* audio not available */ }
+}
+const happySound = () => playTone([523, 659, 784, 1047], 0.12);
+const sadSound = () => playTone([330, 262], 0.2);
+
+/* ============================================================
+   LEARN — render cards
+   ============================================================ */
+function renderCards() {
+  const grids = {
+    gdola: document.getElementById('gridGdola'),
+    ktana: document.getElementById('gridKtana'),
+    special: document.getElementById('gridSpecial'),
+  };
+  NIKUD.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = `nikud-card ${n.type}`;
+    card.style.animationDelay = `${(i % 6) * 0.07}s`;
+    card.innerHTML = `
+      <span class="badge ${n.type}">${TYPE_LABEL[n.type]}</span>
+      <div class="big-sign">${n.sign}</div>
+      <div class="nikud-name">${n.name}</div>
+      <div class="nikud-sound">נשמע כמו: ${n.sound}</div>
+      <button class="play-btn" onclick="speakNikud(${i}, this)">🔊 שמעו אותי</button>
+    `;
+    grids[n.type].appendChild(card);
+  });
+}
+renderCards();
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function showTab(tab) {
+  document.getElementById('learnSection').classList.toggle('hidden', tab !== 'learn');
+  document.getElementById('quizSection').classList.toggle('hidden', tab !== 'quiz');
+  document.getElementById('tabLearn').classList.toggle('active', tab === 'learn');
+  document.getElementById('tabQuiz').classList.toggle('active', tab === 'quiz');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================
+   QUIZ — random 10-question multiple choice
+   ============================================================ */
+const QUIZ_LEN = 10;
+let quiz = { questions: [], index: 0, score: 0 };
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* pick n items with distinct values of key, always including `must` */
+function pickOptions(pool, must, n, keyFn) {
+  const seen = new Set([keyFn(must)]);
+  const others = shuffle(pool.filter(x => !seen.has(keyFn(x))));
+  const result = [must];
+  for (const o of others) {
+    if (result.length >= n) break;
+    if (!seen.has(keyFn(o))) { seen.add(keyFn(o)); result.push(o); }
+  }
+  return shuffle(result);
+}
+
+function buildQuestion() {
+  const types = ['nameFromSign', 'signFromName', 'soundFromSign', 'bigOrSmall'];
+  const qType = rand(types);
+  const vowelsOnly = NIKUD.filter(n => n.type !== 'special');
+
+  if (qType === 'nameFromSign') {
+    const target = rand(NIKUD);
+    const opts = pickOptions(NIKUD, target, 4, n => n.name);
+    return {
+      text: 'איך קוראים לסימן הזה?',
+      sign: target.sign,
+      listen: null,
+      answers: opts.map(o => ({ label: o.name, correct: o === target })),
+      explain: `זה ${target.name}! ${TYPE_LABEL[target.type]}`,
+    };
+  }
+
+  if (qType === 'signFromName') {
+    const target = rand(NIKUD);
+    const opts = pickOptions(NIKUD, target, 4, n => n.sign);
+    return {
+      text: `איפה מתחבא ${target.name}?`,
+      sign: null,
+      listen: target,
+      answers: opts.map(o => ({ label: `<span class="ans-sign">${o.sign}</span>`, correct: o === target })),
+      explain: `${target.name} נראה ככה: ${target.sign}`,
+    };
+  }
+
+  if (qType === 'soundFromSign') {
+    const target = rand(vowelsOnly);
+    const opts = pickOptions(vowelsOnly, target, 4, n => n.sound);
+    return {
+      text: 'איזה צליל משמיע הסימן הזה?',
+      sign: target.sign,
+      listen: null,
+      answers: opts.map(o => ({ label: o.sound, correct: o.sound === target.sound })),
+      explain: `${target.name} נשמע כמו ${target.sound}`,
+    };
+  }
+
+  /* bigOrSmall */
+  const target = rand(vowelsOnly);
+  const answers = shuffle([
+    { label: '🟢 תנועה גדולה', correct: target.type === 'gdola' },
+    { label: '🟠 תנועה קטנה', correct: target.type === 'ktana' },
+  ]);
+  return {
+    text: `${target.name} — תנועה גדולה או קטנה?`,
+    sign: target.sign,
+    listen: null,
+    answers,
+    explain: `${target.name} הוא ${TYPE_LABEL[target.type]}`,
+  };
+}
+
+function startQuiz() {
+  quiz = { questions: [], index: 0, score: 0 };
+  /* build 10 questions, avoiding exact duplicates */
+  const seenTexts = new Set();
+  let guard = 0;
+  while (quiz.questions.length < QUIZ_LEN && guard < 200) {
+    guard++;
+    const q = buildQuestion();
+    const key = q.text + (q.sign || '') + q.answers.map(a => a.label).join('|');
+    if (!seenTexts.has(key)) { seenTexts.add(key); quiz.questions.push(q); }
+  }
+  document.getElementById('quizStart').classList.add('hidden');
+  document.getElementById('quizResult').classList.add('hidden');
+  document.getElementById('quizQuestion').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quiz.questions[quiz.index];
+  document.getElementById('progressFill').style.width = `${(quiz.index / QUIZ_LEN) * 100}%`;
+  document.getElementById('qCounter').textContent = `שאלה ${quiz.index + 1} מתוך ${QUIZ_LEN}`;
+  document.getElementById('qText').textContent = q.text;
+
+  const signWrap = document.getElementById('qSignWrap');
+  signWrap.innerHTML = q.sign ? `<div class="q-sign-display">${q.sign}</div>` : '';
+
+  const listenWrap = document.getElementById('qListen');
+  listenWrap.innerHTML = '';
+  if (q.listen) {
+    const idx = NIKUD.indexOf(q.listen);
+    listenWrap.innerHTML = `<button class="play-btn" onclick="speakNikud(${idx}, this)">🔊 להשמעה שוב</button>`;
+    setTimeout(() => speakNikud(idx, null), 400);
+  }
+
+  const answersEl = document.getElementById('qAnswers');
+  answersEl.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = a.label;
+    btn.onclick = () => answer(i, btn);
+    answersEl.appendChild(btn);
+  });
+
+  const fb = document.getElementById('qFeedback');
+  fb.textContent = '';
+  fb.className = 'feedback-line';
+}
+
+const PRAISE = ['נכון! כל הכבוד! 🌟', 'מעולה! 🎉', 'וואו, אלופים! 🏅', 'בדיוק! 💪', 'יש! תשובה נכונה! 🤩'];
+const OOPS = ['אופס... 🙈', 'לא נורא, ממשיכים! 💛', 'כמעט! פעם הבאה תצליחו 🍀'];
+
+function answer(i, clickedBtn) {
+  const q = quiz.questions[quiz.index];
+  const buttons = document.querySelectorAll('#qAnswers .answer-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('qFeedback');
+  if (q.answers[i].correct) {
+    quiz.score++;
+    clickedBtn.classList.add('correct');
+    fb.textContent = rand(PRAISE);
+    fb.classList.add('good');
+    happySound();
+  } else {
+    clickedBtn.classList.add('wrong');
+    buttons.forEach((b, j) => { if (q.answers[j].correct) b.classList.add('correct'); });
+    fb.textContent = `${rand(OOPS)} ${q.explain}`;
+    fb.classList.add('bad');
+    sadSound();
+  }
+
+  setTimeout(() => {
+    quiz.index++;
+    if (quiz.index < QUIZ_LEN) renderQuestion();
+    else showResults();
+  }, 1800);
+}
+
+function showResults() {
+  document.getElementById('quizQuestion').classList.add('hidden');
+  const resEl = document.getElementById('quizResult');
+  resEl.classList.remove('hidden');
+
+  const s = quiz.score;
+  const pct = (s / QUIZ_LEN) * 100;
+  document.getElementById('scoreCircle').style.setProperty('--pct', pct);
+  document.getElementById('scoreNum').textContent = s;
+
+  const stars = s >= 9 ? 3 : s >= 6 ? 2 : s >= 3 ? 1 : 0;
+  document.getElementById('starsRow').innerHTML =
+    [0, 1, 2].map(i =>
+      `<span class="star" style="animation-delay:${0.3 + i * 0.25}s">${i < stars ? '⭐' : '☆'}</span>`
+    ).join('');
+
+  let title, msg;
+  if (s === 10)      { title = '🏆 מושלם!!!'; msg = 'עניתם נכון על הכל! אתם אלופי הניקוד!'; }
+  else if (s >= 8)  { title = '🎉 כל הכבוד!'; msg = 'תוצאה מעולה! עוד קצת ואתם מושלמים!'; }
+  else if (s >= 5)  { title = '😊 יפה מאוד!'; msg = 'אתם בדרך הנכונה! שווה לחזור ללמוד ולנסות שוב.'; }
+  else               { title = '💪 לא נורא!'; msg = 'כל אלוף מתחיל איפשהו. חזרו לדף הלימוד ונסו שוב!'; }
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+
+  if (s >= 8) { launchConfetti(); happySound(); }
+  setTimeout(() => speak(s >= 8 ? `כל הכבוד! ענית נכון על ${s} שאלות!` : `ענית נכון על ${s} שאלות. נסו שוב!`), 600);
+}
+
+function launchConfetti() {
+  const colors = ['#ff6b9d', '#8b5cf6', '#38bdf8', '#34d399', '#fbbf24', '#fb923c'];
+  for (let i = 0; i < 90; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.animationDuration = 2.2 + Math.random() * 2 + 's';
+    p.style.animationDelay = Math.random() * 0.8 + 's';
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 5500);
+  }
+}
+</script>
+</body>
+</html>
