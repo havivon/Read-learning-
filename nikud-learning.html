@@ -789,15 +789,24 @@ function pickOptions(pool, must, n, keyFn) {
   return shuffle(result);
 }
 
-function buildQuestion() {
-  const types = ['nameFromSign', 'signFromName', 'soundFromSign', 'bigOrSmall'];
-  const qType = rand(types);
+/* question types valid for a given sign — visually ambiguous signs
+   (kamatz katan, shva variants) can't be identified by sight */
+function validTypes(n) {
+  const t = [];
+  if (!n.hideFromSignQuiz) {
+    t.push('nameFromSign', 'signFromName');
+    if (n.type !== 'special') t.push('soundFromSign');
+  }
+  if (n.type !== 'special') t.push('bigOrSmall');
+  return t;
+}
+
+function buildQuestionFor(target, qType) {
   const vowelsOnly = NIKUD.filter(n => n.type !== 'special');
   const signQuizPool = NIKUD.filter(n => !n.hideFromSignQuiz);
   const vowelSignPool = vowelsOnly.filter(n => !n.hideFromSignQuiz);
 
   if (qType === 'nameFromSign') {
-    const target = rand(signQuizPool);
     const opts = pickOptions(signQuizPool, target, 4, n => n.name);
     return {
       text: 'מהו שם הסימן?',
@@ -809,7 +818,6 @@ function buildQuestion() {
   }
 
   if (qType === 'signFromName') {
-    const target = rand(signQuizPool);
     const opts = pickOptions(signQuizPool, target, 4, n => n.sign);
     return {
       text: `איזה מהסימנים הוא ${target.name}?`,
@@ -821,7 +829,6 @@ function buildQuestion() {
   }
 
   if (qType === 'soundFromSign') {
-    const target = rand(vowelSignPool);
     const opts = pickOptions(vowelSignPool, target, 4, n => n.sound);
     return {
       text: 'כיצד נהגה הסימן?',
@@ -833,7 +840,6 @@ function buildQuestion() {
   }
 
   /* bigOrSmall */
-  const target = rand(vowelsOnly);
   const answers = shuffle([
     { label: 'תנועה גדולה', correct: target.type === 'gdola' },
     { label: 'תנועה קטנה', correct: target.type === 'ktana' },
@@ -849,14 +855,9 @@ function buildQuestion() {
 
 function startQuiz() {
   quiz = { questions: [], index: 0, score: 0 };
-  const seenTexts = new Set();
-  let guard = 0;
-  while (quiz.questions.length < QUIZ_LEN && guard < 200) {
-    guard++;
-    const q = buildQuestion();
-    const key = q.text + (q.sign || '') + q.answers.map(a => a.label).join('|');
-    if (!seenTexts.has(key)) { seenTexts.add(key); quiz.questions.push(q); }
-  }
+  /* every question gets a different sign, so questions never repeat */
+  const targets = shuffle(NIKUD.filter(n => validTypes(n).length > 0)).slice(0, QUIZ_LEN);
+  quiz.questions = targets.map(t => buildQuestionFor(t, rand(validTypes(t))));
   document.getElementById('quizStart').classList.add('hidden');
   document.getElementById('quizResult').classList.add('hidden');
   document.getElementById('quizReview').classList.add('hidden');
